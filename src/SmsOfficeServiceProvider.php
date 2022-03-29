@@ -2,9 +2,9 @@
 
 namespace Nikajorjika\SmsOffice;
 
-use App\Channels\SmsOfficeChannel;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\ServiceProvider;
+use Nikajorjika\SmsOffice\SmsOfficeChannel;
 use Nikajorjika\SmsOffice\SmsOffice;
 
 class SmsOfficeServiceProvider extends ServiceProvider
