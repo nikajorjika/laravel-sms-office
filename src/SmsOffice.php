@@ -29,6 +29,7 @@ class SmsOffice
         $this->key = config('smsoffice.key');
         $this->from = config('smsoffice.sender');
         $this->driver = config('smsoffice.driver');
+        $this->noSmsCode = config('smsoffice.no_sms_code');
         $this->supportedDrivers = config('smsoffice.supported_drivers');
     }
 
@@ -215,6 +216,10 @@ class SmsOffice
      */
     public function message($message): self
     {
+        if ($this->noSmsCode) {
+            $message .= "NO " . $this->noSmsCode;
+        }
+        
         $this->message = strlen($message) !== strlen(utf8_decode($message)) ? rawurlencode($message) : $message;
 
         return $this;

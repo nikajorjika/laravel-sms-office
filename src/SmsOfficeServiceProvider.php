@@ -20,6 +20,7 @@ class SmsOfficeServiceProvider extends ServiceProvider
             return new SmsOffice();
         });
         $this->mergeConfigFrom(__DIR__ . '/../config/config.php', 'smsoffice');
+
     }
 
     /**
@@ -33,5 +34,13 @@ class SmsOfficeServiceProvider extends ServiceProvider
         Notification::extend('sms-office', function ($app) {
             return new SmsOfficeChannel();
         });
+
+        if ($this->app->runningInConsole()) {
+
+            $this->publishes([
+              __DIR__.'/../config/config.php' => config_path('smsoffice.php'),
+            ], 'config');
+        
+          }
     }
 }

@@ -17,7 +17,8 @@ return [
     'driver' => env('SMS_OFFICE_DRIVER', 'sms-office'),
 
     /**
-     * Driver that serves as a channel driver for laravel
+     * This key defines sender name
+     * for the sms to be delivered from
      */
     'from' => env('SMS_OFFICE_FROM', NULL),
 
@@ -25,4 +26,10 @@ return [
      * List of drivers that sms office package supports
      */
     'supported_drivers' => ['sms-office', 'log'],
+
+    /**
+     * Define no sms code for the user to unsubscribe
+     */
+    'no_sms_code' => env('SMS_OFFICE_NOSMS', NULL),
+
 ];
