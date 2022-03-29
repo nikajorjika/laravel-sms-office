@@ -1,29 +1,31 @@
 {
-    "name": "nikajorjika/sms-office",
-    "description": "Package that servers as a channel provider for Georgian SMS office web service",
-    "type": "laravel-package",
-    "license": "MIT",
-    "autoload": {
-        "psr-4": {
-            "Nikajorjika\\SmsOffice\\": "src"
-        }
-    },
-    "authors": [
-        {
-            "name": "Nika Jorjoliani",
-            "email": "nikajorjika1993@gmail.com"
-        }
-    ],
-    "minimum-stability": "stable",
-    "require": {},
-    "extra": {
-        "laravel": {
-            "providers": [
-                "Nikajorjika\\SmsOffice\\SmsOfficeServiceProvider"
-            ],
-            "aliases": {
-                "SmsOffice": "Nikajorjika\\SmsOffice\\Facades\\SmsOffice"
-            }
-        }
+  "name": "nikajorjika/sms-office",
+  "description": "Package that servers as a channel provider for Georgian SMS office web service",
+  "type": "laravel-package",
+  "license": "MIT",
+  "autoload": {
+    "psr-4": {
+      "Nikajorjika\\SmsOffice\\": "src"
     }
+  },
+  "authors": [
+    {
+      "name": "Nika Jorjoliani",
+      "email": "nikajorjika1993@gmail.com"
+    }
+  ],
+  "minimum-stability": "stable",
+  "extra": {
+    "laravel": {
+      "providers": [
+        "Nikajorjika\\SmsOffice\\SmsOfficeServiceProvider"
+      ],
+      "aliases": {
+        "SmsOffice": "Nikajorjika\\SmsOffice\\Facades\\SmsOffice"
+      }
+    }
+  },
+  "require-dev": {
+    "orchestra/testbench": "^7.0"
+  }
 }
