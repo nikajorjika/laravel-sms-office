@@ -4,7 +4,7 @@ _nikajorjika/laravel-sms-office_ is a support package for [smsoffice.ge](https:/
 
 ## Installation
 
-Use [composer](https://getcomposer.org/) php package manager to install foobar.
+Use [composer](https://getcomposer.org/) php package manager to install _nikajorjika/laravel-sms-office_.
 
 ```bash
 composer require nikajorjika/laravel-sms-office
