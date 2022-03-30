@@ -217,7 +217,7 @@ class SmsOffice
     public function message($message): self
     {
         if ($this->noSmsCode) {
-            $message .= "NO " . $this->noSmsCode;
+            $message .= " NO " . $this->noSmsCode;
         }
         
         $this->message = strlen($message) !== strlen(utf8_decode($message)) ? rawurlencode($message) : $message;
