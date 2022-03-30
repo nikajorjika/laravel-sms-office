@@ -20,6 +20,53 @@ SMS_OFFICE_SENDER=[sender-name]
 SMS_OFFICE_NOSMS=[no-sms-code-provided-by-smsoffice.ge]
 ```
 
+To further customize and configure package we first need to publish our config file:
+
+```bash
+php artisan vendor:publish --provider="Nikajorjika\SmsOffice\SmsOfficeServiceProvider" --tag="config"
+```
+
+this will publish **smsoffice.php** file inside our **config** folder:
+
+```php
+<?php
+
+return [
+    /**
+     * Endpoint for sms office url
+     */
+    'api_url' => env('SMS_OFFICE_URL', 'http://smsoffice.ge/api/v2/send/'),
+
+    /**
+     * Private Key provided by sms office service
+     */
+    'key' => env('SMS_OFFICE_KEY', null),
+
+    /**
+     * Driver that serves as a channel driver for laravel
+     */
+    'driver' => env('SMS_OFFICE_DRIVER', 'sms-office'),
+
+    /**
+     * This key defines sender name
+     * for the sms to be delivered from
+     */
+    'from' => env('SMS_OFFICE_FROM', NULL),
+
+    /**
+     * List of drivers that sms office package supports
+     */
+    'supported_drivers' => ['sms-office', 'log'],
+
+    /**
+     * Define no sms code for the user to unsubscribe
+     */
+    'no_sms_code' => env('SMS_OFFICE_NOSMS', NULL),
+
+];
+
+```
+
 ## Usage
 
 There are two ways to use this package.
@@ -103,53 +150,6 @@ class User extends Authenticatable
 that's it now we will be able to send notifications via additional SmsOffice channel.
 
 ## Package Configuration
-
-To further customize and configure package we first need to publish our config file:
-
-```bash
-php artisan vendor:publish --provider="Nikajorjika\SmsOffice\SmsOfficeServiceProvider" --tag="config"
-```
-
-this will publish **smsoffice.php** file inside our **config** folder:
-
-```php
-<?php
-
-return [
-    /**
-     * Endpoint for sms office url
-     */
-    'api_url' => env('SMS_OFFICE_URL', 'http://smsoffice.ge/api/v2/send/'),
-
-    /**
-     * Private Key provided by sms office service
-     */
-    'key' => env('SMS_OFFICE_KEY', null),
-
-    /**
-     * Driver that serves as a channel driver for laravel
-     */
-    'driver' => env('SMS_OFFICE_DRIVER', 'sms-office'),
-
-    /**
-     * This key defines sender name
-     * for the sms to be delivered from
-     */
-    'from' => env('SMS_OFFICE_FROM', NULL),
-
-    /**
-     * List of drivers that sms office package supports
-     */
-    'supported_drivers' => ['sms-office', 'log'],
-
-    /**
-     * Define no sms code for the user to unsubscribe
-     */
-    'no_sms_code' => env('SMS_OFFICE_NOSMS', NULL),
-
-];
-
-```
 
 ## Contributing
 

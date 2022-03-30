@@ -27,7 +27,7 @@ class SmsOffice
     {
         $this->url = config('smsoffice.api_url');
         $this->key = config('smsoffice.key');
-        $this->from = config('smsoffice.sender');
+        $this->from = config('smsoffice.from');
         $this->driver = config('smsoffice.driver');
         $this->noSmsCode = config('smsoffice.no_sms_code');
         $this->supportedDrivers = config('smsoffice.supported_drivers');
