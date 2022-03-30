@@ -15,8 +15,8 @@ composer require nikajorjika/laravel-sms-office
 ```
 # for testing purposes you can also use SMS_OFFICE_DRIVE=log
 SMS_OFFICE_DRIVER=sms-office
-SMS_OFFICE_API_KEY=[api-key-provided-by-smsoffice.ge]
-SMS_OFFICE_SENDER=[sender-name]
+SMS_OFFICE_KEY=[api-key-provided-by-smsoffice.ge]
+SMS_OFFICE_FROM=[sender-name]
 SMS_OFFICE_NOSMS=[no-sms-code-provided-by-smsoffice.ge]
 ```
 
