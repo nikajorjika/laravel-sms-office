@@ -2,7 +2,6 @@
 
 namespace Nikajorjika\SmsOffice;
 
-use Exception;
 use Illuminate\Notifications\Notification;
 use Nikajorjika\SmsOffice\Facades\SmsOffice;
 

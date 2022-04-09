@@ -2,8 +2,10 @@
 
 namespace Nikajorjika\SmsOffice;
 
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\ServiceProvider;
+use Nikajorjika\SmsOffice\Contracts\SmsOffice as ContractsSmsOffice;
 use Nikajorjika\SmsOffice\SmsOfficeChannel;
 use Nikajorjika\SmsOffice\SmsOffice;
 
@@ -19,8 +21,8 @@ class SmsOfficeServiceProvider extends ServiceProvider
         $this->app->bind('sms-office', function ($app) {
             return new SmsOffice();
         });
+        $this->app->bind(ContractsSmsOffice::class, SmsOffice::class);
         $this->mergeConfigFrom(__DIR__ . '/../config/config.php', 'smsoffice');
-
     }
 
     /**
@@ -38,9 +40,8 @@ class SmsOfficeServiceProvider extends ServiceProvider
         if ($this->app->runningInConsole()) {
 
             $this->publishes([
-              __DIR__.'/../config/config.php' => config_path('smsoffice.php'),
+                __DIR__ . '/../config/config.php' => config_path('smsoffice.php'),
             ], 'config');
-        
-          }
+        }
     }
 }

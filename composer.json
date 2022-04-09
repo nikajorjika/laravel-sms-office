@@ -8,6 +8,11 @@
       "Nikajorjika\\SmsOffice\\": "src"
     }
   },
+  "autoload-dev": {
+    "psr-4": {
+      "Nikajorjika\\SmsOffice\\Tests\\": "tests"
+    }
+  },
   "authors": [
     {
       "name": "Nika Jorjoliani",
@@ -26,6 +31,7 @@
     }
   },
   "require-dev": {
-    "orchestra/testbench": "^7.0"
+    "orchestra/testbench": "^7.0",
+    "phpunit/phpunit": "^9.5"
   }
 }

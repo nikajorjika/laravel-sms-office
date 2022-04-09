@@ -5,8 +5,9 @@ namespace Nikajorjika\SmsOffice;
 use Exception;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Nikajorjika\SmsOffice\Contracts\SmsOffice as SmsOfficeContract;
 
-class SmsOffice
+class SmsOffice implements SmsOfficeContract
 {
     const QUERY_STRING = 'key=%s&destination=%s&sender=%s&content=%s';
 
@@ -16,6 +17,7 @@ class SmsOffice
     protected $from;
     protected $to;
     protected $message;
+    protected $noSmsCode;
     protected $supportedDrivers;
     protected $dryRun = 'no';
 
@@ -26,10 +28,10 @@ class SmsOffice
     public function __construct()
     {
         $this->url = config('smsoffice.api_url');
-        $this->key = config('smsoffice.key');
-        $this->from = config('smsoffice.from');
-        $this->driver = config('smsoffice.driver');
-        $this->noSmsCode = config('smsoffice.no_sms_code');
+        $this->key = config('smsoffice.key') ?? '';
+        $this->from = config('smsoffice.from') ?? '';
+        $this->driver = config('smsoffice.driver') ?? 'log';
+        $this->noSmsCode = config('smsoffice.no_sms_code') ?? '';
         $this->supportedDrivers = config('smsoffice.supported_drivers');
     }
 
@@ -41,19 +43,19 @@ class SmsOffice
      * 
      * @return string
      */
-    public function send()
+    public function send(): string
     {
         $this->validateConfigParams();
         $this->validateSmsParams();
-        if (strlen($this->to) !== 12) {
+        if (strlen($this->getTo()) !== 12) {
             throw new Exception('Destination phone number is not valid!');
         }
 
-        if (strtolower($this->driver) === 'log') {
-            return $this->logMessage($this->to, $this->message);
+        if ($this->getDriver() === 'log') {
+            return $this->logMessage($this->getTo(), $this->getMessage());
         }
 
-        $fullServiceUrl = $this->getServiceUrl($this->to, $this->message);
+        $fullServiceUrl = $this->getServiceUrl($this->getTo());
 
         return Http::get($fullServiceUrl)->body();
     }
@@ -62,13 +64,12 @@ class SmsOffice
      * Get Sevice final url string
      * 
      * @param string $destination
-     * @param string $message
      * 
      * @return string
      */
-    public function getServiceUrl(string $destination, string $message): string
+    public function getServiceUrl(string $destination): string
     {
-        return $this->url . '?' . $this->getReplacedQueryString($destination, $message);
+        return $this->getUrl() . '?' . $this->getReplacedQueryString($destination, $this->getMessage());
     }
 
     /**
@@ -78,20 +79,21 @@ class SmsOffice
      * 
      * @return string
      */
-    public function getReplacedQueryString(string $destination, string $message): string
+    public function getReplacedQueryString(string $destination): string
     {
-        return sprintf(self::QUERY_STRING, $this->key, $destination, $this->from, $message);
+        return sprintf(self::QUERY_STRING, $this->key, $destination, $this->getFrom(), $this->getMessage());
     }
 
 
     /**
      * Generates log for faking sms functionality without sending actual sms
+     * @param string $destination
      * 
      * @return string
      */
-    public function logMessage(string $destination, string $message): string
+    public function logMessage(string $destination): string
     {
-        $logMessage = 'From: ' . $this->from . ' To: ' . $destination . '/n MESSAGE:/n' . $message;
+        $logMessage = 'From: ' . $this->getFrom() . ' To: ' . $destination . '/n MESSAGE:/n' . $this->getMessage();
 
         Log::info($logMessage);
 
@@ -103,10 +105,15 @@ class SmsOffice
      * function returns corrected phone number if correction is successful
      * @param string $phone
      * 
+     * @throws Exception
      * @return string
      */
     public static function getValidatedPhoneNumber(string $phone): string
     {
+        if (!preg_match('/^(\+?)(\d{9}|\d{12})$/', $phone)) {
+            throw new Exception("Number you provided is not in a correct format!");
+        }
+
         $phone = preg_replace('/[^0-9]/', '', $phone);
 
         if (substr($phone, 0, 3) != '995') {
@@ -151,7 +158,7 @@ class SmsOffice
      */
     public function validateSmsParams(): bool
     {
-        if (!$this->to || !$this->message) {
+        if (!$this->getTo() || !$this->getMessage()) {
             throw new Exception("Please provide 'to()' and 'message()' methods, while building the notification message!");
         }
         return true;
@@ -216,12 +223,80 @@ class SmsOffice
      */
     public function message($message): self
     {
-        if ($this->noSmsCode) {
-            $message .= " NO " . $this->noSmsCode;
+        if ($this->getNoSmsCode()) {
+            $message .= " NO " . $this->getNoSmsCode();
         }
-        
+
         $this->message = strlen($message) !== strlen(utf8_decode($message)) ? rawurlencode($message) : $message;
 
         return $this;
+    }
+
+    /**
+     * Get supported drivers property
+     * 
+     * @return string
+     */
+    public function getSupportedDrivers(): array
+    {
+        return $this->supportedDrivers;
+    }
+
+    /**
+     * Get from property
+     * 
+     * @return string
+     */
+    public function getFrom(): string
+    {
+        return $this->from;
+    }
+
+    /**
+     * Get to property
+     * 
+     * @return string
+     */
+    public function getTo(): string
+    {
+        return $this->to ?? '';
+    }
+
+    /**
+     * Get message property
+     * 
+     * @return string
+     */
+    public function getMessage(): string
+    {
+        return $this->message ?? '';
+    }
+    /**
+     * Get driver property
+     * 
+     * @return string
+     */
+    public function getDriver(): string
+    {
+        return $this->driver ?? 'log';
+    }
+
+    /**
+     * Get url property
+     * 
+     * @return string
+     */
+    public function getUrl(): string
+    {
+        return $this->url;
+    }
+    /**
+     * Get noSmsCode property
+     * 
+     * @return string
+     */
+    public function getNoSmsCode(): string
+    {
+        return $this->noSmsCode;
     }
 }
