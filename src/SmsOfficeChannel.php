@@ -15,6 +15,6 @@ class SmsOfficeChannel
         $message = $notification->toSms($notifiable);
         $phoneNumber = $notifiable->routeNotificationFor('Sms');
 
-        return SmsOffice::message($message)->to($phoneNumber)->send();
+        return SmsOffice::message($message)->to($phoneNumber)->send(true);
     }
 }

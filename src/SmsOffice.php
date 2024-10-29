@@ -3,7 +3,6 @@
 namespace Nikajorjika\SmsOffice;
 
 use Exception;
-use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Nikajorjika\SmsOffice\Factories\SmsServiceDriverFactory;
 
@@ -34,7 +33,7 @@ class SmsOffice
         $this->supportedDrivers = config('smsoffice.supported_drivers');
     }
 
-    public function send()
+    public function send(bool $urgent = false)
     {
         $this->validateConfigParams();
         $this->validateSmsParams();
@@ -48,7 +47,7 @@ class SmsOffice
 
         $driver = SmsServiceDriverFactory::createDriver();
 
-        $driver->send($this->to, $this->message);
+        $driver->send($this->to, $this->message, $urgent);
     }
 
 
@@ -146,9 +145,9 @@ class SmsOffice
      *
      * @return self
      */
-    public function dryrun(string $dry = 'yes'): self
+    public function dryRun(string $dry = 'yes'): self
     {
-        $this->dryrun = $dry;
+        $this->dryRun = $dry;
 
         return $this;
     }

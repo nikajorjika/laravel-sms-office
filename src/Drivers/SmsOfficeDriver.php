@@ -9,11 +9,11 @@ use Nikajorjika\SmsOffice\Contracts\SmsServiceContract;
 
 class SmsOfficeDriver implements SmsServiceContract
 {
-    const QUERY_STRING = 'key=%s&destination=%s&sender=%s&content=%s';
+    const QUERY_STRING = 'key=%s&destination=%s&sender=%s&content=%s&urgent=%s';
 
-    public function send(string $to, string $message): string
+    public function send(string $to, string $message, bool $urgent = false): string
     {
-        $fullServiceUrl = $this->getServiceUrl($to, $message);
+        $fullServiceUrl = $this->getServiceUrl($to, $message, $urgent);
 
         return Http::get($fullServiceUrl)->body();
     }
@@ -26,26 +26,12 @@ class SmsOfficeDriver implements SmsServiceContract
      *
      * @return string
      */
-    private function getServiceUrl(string $to, string $message): string
+    private function getServiceUrl(string $to, string $message, bool $urgent = false): string
     {
         $url = 'http://smsoffice.ge/api/v2/send/';
-
-        return $url.'?'.$this->getReplacedQueryString($to, $message);
-    }
-
-    /**
-     * Get query string with replaced variables according to SMS Office documentation
-     *
-     * @param  string  $destination
-     * @param  string  $message
-     *
-     * @return string
-     */
-    private function getReplacedQueryString(string $destination, string $message): string
-    {
         $key = config('smsoffice.key');
         $from = config('smsoffice.from');
 
-        return sprintf(self::QUERY_STRING, $key, $destination, $from, $message);
+        return $url.'?'.sprintf(self::QUERY_STRING, $key, $to, $from, $message, $urgent);
     }
 }
