@@ -30,7 +30,6 @@ class GoSmsDriver implements SmsServiceContract
         $key = config('smsoffice.key');
         $from = config('smsoffice.from');
 
-        return $url.'?'.sprintf(self::QUERY_STRING, $key, $to, $from, $message, $urgent);
+        return $url . '?' . sprintf(self::QUERY_STRING, $key, $to, $from, $message, $urgent ? 'true' : 'false');
     }
-
 }
