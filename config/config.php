@@ -2,12 +2,7 @@
 
 return [
     /**
-     * Endpoint for sms office url
-     */
-    'api_url' => env('SMS_OFFICE_URL', 'http://smsoffice.ge/api/v2/send/'),
-
-    /**
-     * Private Key provided by sms office service 
+     * Private Key provided by sms office service
      */
     'key' => env('SMS_OFFICE_KEY', null),
 
@@ -25,7 +20,7 @@ return [
     /**
      * List of drivers that sms office package supports
      */
-    'supported_drivers' => ['sms-office', 'log'],
+    'supported_drivers' => ['sms-office', 'go-sms', 'log'],
 
     /**
      * Define no sms code for the user to unsubscribe

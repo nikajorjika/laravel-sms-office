@@ -5,12 +5,10 @@ namespace Nikajorjika\SmsOffice;
 use Exception;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
-use Nikajorjika\SmsOffice\Contracts\SmsOffice as SmsOfficeContract;
+use Nikajorjika\SmsOffice\Factories\SmsServiceDriverFactory;
 
-class SmsOffice implements SmsOfficeContract
+class SmsOffice
 {
-    const QUERY_STRING = 'key=%s&destination=%s&sender=%s&content=%s';
-
     protected $driver;
     protected $key;
     protected $url;
@@ -23,77 +21,45 @@ class SmsOffice implements SmsOfficeContract
 
     /**
      * Construct new sms office class with it's essential variables
+     *
      * @return void
      */
     public function __construct()
     {
         $this->url = config('smsoffice.api_url');
-        $this->key = config('smsoffice.key') ?? '';
-        $this->from = config('smsoffice.from') ?? '';
-        $this->driver = config('smsoffice.driver') ?? 'log';
-        $this->noSmsCode = config('smsoffice.no_sms_code') ?? '';
+        $this->key = config('smsoffice.key');
+        $this->from = config('smsoffice.from');
+        $this->driver = config('smsoffice.driver');
+        $this->noSmsCode = config('smsoffice.no_sms_code');
         $this->supportedDrivers = config('smsoffice.supported_drivers');
     }
 
-    /**
-     * Get Sevice final url string
-     * 
-     * @param string $destination
-     * @param string $message
-     * 
-     * @return string
-     */
-    public function send(): string
+    public function send()
     {
         $this->validateConfigParams();
         $this->validateSmsParams();
-        if (strlen($this->getTo()) !== 12) {
+        if (strlen($this->to) !== 12) {
             throw new Exception('Destination phone number is not valid!');
         }
 
-        if ($this->getDriver() === 'log') {
-            return $this->logMessage($this->getTo(), $this->getMessage());
+        if (strtolower($this->driver) === 'log') {
+            return $this->logMessage($this->to, $this->message);
         }
 
-        $fullServiceUrl = $this->getServiceUrl($this->getTo());
+        $driver = SmsServiceDriverFactory::createDriver();
 
-        return Http::get($fullServiceUrl)->body();
-    }
-
-    /**
-     * Get Sevice final url string
-     * 
-     * @param string $destination
-     * 
-     * @return string
-     */
-    public function getServiceUrl(string $destination): string
-    {
-        return $this->getUrl() . '?' . $this->getReplacedQueryString($destination, $this->getMessage());
-    }
-
-    /**
-     * Get query string with replaced variables according to SMS Office documentation
-     * @param string $destination
-     * @param string $message 
-     * 
-     * @return string
-     */
-    public function getReplacedQueryString(string $destination): string
-    {
-        return sprintf(self::QUERY_STRING, $this->key, $destination, $this->getFrom(), $this->getMessage());
+        $driver->send($this->to, $this->message);
     }
 
 
     /**
      * Generates log for faking sms functionality without sending actual sms
-     * @param string $destination
-     * 
+     *
      * @return string
      */
-    public function logMessage(string $destination): string
+    public function logMessage(string $destination, string $message): string
     {
-        $logMessage = 'From: ' . $this->getFrom() . ' To: ' . $destination . '/n MESSAGE:/n' . $this->getMessage();
+        $logMessage = 'From: '.$this->from.' To: '.$destination.'/n MESSAGE:/n'.$message;
 
         Log::info($logMessage);
 
@@ -103,21 +69,17 @@ class SmsOffice implements SmsOfficeContract
     /**
      * Validate phone number based on Georgian national format
      * function returns corrected phone number if correction is successful
-     * @param string $phone
-     * 
-     * @throws Exception
+     *
+     * @param  string  $phone
+     *
      * @return string
      */
     public static function getValidatedPhoneNumber(string $phone): string
     {
-        if (!preg_match('/^(\+?)(\d{9}|\d{12})$/', $phone)) {
-            throw new Exception("Number you provided is not in a correct format!");
-        }
-
         $phone = preg_replace('/[^0-9]/', '', $phone);
 
         if (substr($phone, 0, 3) != '995') {
-            $phone = '995' . $phone;
+            $phone = '995'.$phone;
         }
 
         return $phone;
@@ -126,11 +88,11 @@ class SmsOffice implements SmsOfficeContract
     /**
      * Check if all the parameters required for the package is actually provided
      * it will throw an error if any parameters are missing from the config file
-     * 
-     * @param string $phone
-     * 
-     * @throws Exception
+     *
+     * @param  string  $phone
+     *
      * @return bool
+     * @throws Exception
      */
     public function validateConfigParams(): bool
     {
@@ -144,7 +106,8 @@ class SmsOffice implements SmsOfficeContract
             throw $this->getMissingParamException('SMS_OFFICE_DRIVER');
         }
         if (!in_array($this->driver, $this->supportedDrivers)) {
-            throw new Exception("SMS_OFFICE_DRIVER should be one of these values: " . implode(', ', $this->supportedDrivers));
+            throw new Exception("SMS_OFFICE_DRIVER should be one of these values: ".implode(', ',
+                    $this->supportedDrivers));
         }
 
         return true;
@@ -152,13 +115,13 @@ class SmsOffice implements SmsOfficeContract
 
     /**
      * Check if all the nessesary sms office params are set
-     * 
-     * @throws Exception
+     *
      * @return bool
+     * @throws Exception
      */
     public function validateSmsParams(): bool
     {
-        if (!$this->getTo() || !$this->getMessage()) {
+        if (!$this->to || !$this->message) {
             throw new Exception("Please provide 'to()' and 'message()' methods, while building the notification message!");
         }
         return true;
@@ -166,8 +129,9 @@ class SmsOffice implements SmsOfficeContract
 
     /**
      * Get parameter is missing exception with generic text
-     * @param string $parameterName
-     * 
+     *
+     * @param  string  $parameterName
+     *
      * @return Exception
      */
     public function getMissingParamException(string $parameterName): Exception
@@ -177,8 +141,9 @@ class SmsOffice implements SmsOfficeContract
 
     /**
      * Set 'dryRun' property to given value
-     * @param string $dry
-     * 
+     *
+     * @param  string  $dry
+     *
      * @return self
      */
     public function dryrun(string $dry = 'yes'): self
@@ -191,8 +156,9 @@ class SmsOffice implements SmsOfficeContract
 
     /**
      * Set 'from' property to given value
-     * @param string $dry
-     * 
+     *
+     * @param  string  $dry
+     *
      * @return self
      */
     public function from($from): self
@@ -204,8 +170,9 @@ class SmsOffice implements SmsOfficeContract
 
     /**
      * Set 'to' property to given value
-     * @param string $to
-     * 
+     *
+     * @param  string  $to
+     *
      * @return self
      */
     public function to(string $to): self
@@ -217,86 +184,19 @@ class SmsOffice implements SmsOfficeContract
 
     /**
      * Set 'message' property to given value
-     * @param string $dry
-     * 
+     *
+     * @param  string  $dry
+     *
      * @return self
      */
     public function message($message): self
     {
-        if ($this->getNoSmsCode()) {
-            $message .= " NO " . $this->getNoSmsCode();
+        if ($this->noSmsCode) {
+            $message .= " NO ".$this->noSmsCode;
         }
 
         $this->message = strlen($message) !== strlen(utf8_decode($message)) ? rawurlencode($message) : $message;
 
         return $this;
-    }
-
-    /**
-     * Get supported drivers property
-     * 
-     * @return string
-     */
-    public function getSupportedDrivers(): array
-    {
-        return $this->supportedDrivers;
-    }
-
-    /**
-     * Get from property
-     * 
-     * @return string
-     */
-    public function getFrom(): string
-    {
-        return $this->from;
-    }
-
-    /**
-     * Get to property
-     * 
-     * @return string
-     */
-    public function getTo(): string
-    {
-        return $this->to ?? '';
-    }
-
-    /**
-     * Get message property
-     * 
-     * @return string
-     */
-    public function getMessage(): string
-    {
-        return $this->message ?? '';
-    }
-    /**
-     * Get driver property
-     * 
-     * @return string
-     */
-    public function getDriver(): string
-    {
-        return $this->driver ?? 'log';
-    }
-
-    /**
-     * Get url property
-     * 
-     * @return string
-     */
-    public function getUrl(): string
-    {
-        return $this->url;
-    }
-    /**
-     * Get noSmsCode property
-     * 
-     * @return string
-     */
-    public function getNoSmsCode(): string
-    {
-        return $this->noSmsCode;
     }
 }
